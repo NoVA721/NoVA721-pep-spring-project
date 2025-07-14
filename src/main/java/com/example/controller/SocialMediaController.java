@@ -103,4 +103,25 @@ public class SocialMediaController {
             return ResponseEntity.status(200).body("");
         }
     }
+
+    //create a new message. This requires me to be able to find users. Last one I can do without touching Accounts is updating via the messageId.
+   /*@PostMapping("messages")
+    public ResponseEntity<Message>
+    {
+
+    }*/
+
+    //update message via messageid
+    @PatchMapping("messages/{messageId}")
+    public ResponseEntity<String> updateMessageByMessageId(@PathVariable Integer messageId, @RequestBody Message updateMessage)
+    {
+        if(messageService.updateMessageByMessageId(messageId, updateMessage.getMessageText()) == 1)
+        {
+            return ResponseEntity.status(200).body("1");
+        }
+        else
+        {
+            return ResponseEntity.status(400).body("");
+        }
+    }
 }

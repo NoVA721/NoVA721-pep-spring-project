@@ -52,4 +52,21 @@ public class MessageService {
         }
         return 0;
     }
+
+    //update message by message ID, return number of rows edited for the response body or... be empty, I guess, for a failure? another one like this that trips me up for the return.
+    //i get the feeling I'm doing this hella wrong.
+    public int updateMessageByMessageId(Integer messageId, String updatedMessage)
+    {
+        //we need to check if messageId is real, if updatedMessage is not blank and if it's not over 255 characters. If not, it fails, so... we return... 0...
+        Optional<Message> optionalMessage = messageRepository.findById(messageId); //findById is for primary key
+        if(optionalMessage.isPresent() && updatedMessage != "" && updatedMessage.length() <= 255) //if it meets all 3 of these, than it's a valid update.
+        {
+            optionalMessage.get().setMessageText(updatedMessage); //hopefully this alone will update the text?
+            return 1;
+        }
+        else
+        {
+            return 0;
+        }
+    }
 }
