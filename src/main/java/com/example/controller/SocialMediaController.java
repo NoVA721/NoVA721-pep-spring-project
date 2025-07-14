@@ -124,4 +124,7 @@ public class SocialMediaController {
             return ResponseEntity.status(400).body("");
         }
     }
+
+    //Honestly, I don't think I can properly move forward due to the weird issue I'm having with the AccountRepository. 
+    //I think i may interfere with things needing to touch upon the userIds/AccountService/AccountRepository, which the remaining ones do.
 }
