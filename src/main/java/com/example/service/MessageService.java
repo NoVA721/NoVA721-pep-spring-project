@@ -40,4 +40,16 @@ public class MessageService {
     {
         return messageRepository.findAll();
     }
+
+    //delete message by message id, return number of rows deleted. This is probably the silliest way to do this, and probably incorrect.
+    public int deleteMessageByMessageId(Integer messageId)
+    {
+        Optional<Message> optionalMessage = messageRepository.findById(messageId); //findById is for primary key
+        if(optionalMessage.isPresent())
+        {
+            messageRepository.deleteById(messageId);
+            return 1;
+        }
+        return 0;
+    }
 }

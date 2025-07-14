@@ -5,9 +5,6 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.bind.annotation.*;
 import com.example.entity.Account;
 import com.example.entity.Message;
@@ -89,5 +86,21 @@ public class SocialMediaController {
     public ResponseEntity<List<Message>> getAllMessages()
     {
         return ResponseEntity.status(200).body(messageService.getAllMessages());
+    }
+    
+    //delete message by its ID
+    @DeleteMapping("messages/{messageId}")
+    public ResponseEntity<String> deleteMessageByMessageId(@PathVariable Integer messageId)
+    {
+        //return null;
+        //this needs to return a response entity with the body having however many were deleted if any were, and empty if none were. how in the god damn. I guess just have the messageService.whatever return the number of rows affected, and if 0 then have it be empty.
+        if(messageService.deleteMessageByMessageId(messageId) == 1)
+        {
+            return ResponseEntity.status(200).body("1");
+        }
+        else
+        {
+            return ResponseEntity.status(200).body("");
+        }
     }
 }
