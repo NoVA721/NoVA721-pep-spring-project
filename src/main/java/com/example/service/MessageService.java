@@ -21,6 +21,11 @@ public class MessageService {
         this.messageRepository = messageRepository;
     }
 
+    public Message persistMessage(Message message)
+    {
+        return messageRepository.save(message);
+    }
+
     //get message by its messageID, return message
     public Message getMessageByMessageId(Integer messageId)
     {
@@ -41,7 +46,7 @@ public class MessageService {
         return messageRepository.findAll();
     }
 
-    //delete message by message id, return number of rows deleted. This is probably the silliest way to do this, and probably incorrect.
+    //delete message by message id, return number of rows deleted. This is probably the silliest way to do this, and probably incorrect in some capacity.
     public int deleteMessageByMessageId(Integer messageId)
     {
         Optional<Message> optionalMessage = messageRepository.findById(messageId); //findById is for primary key
@@ -68,5 +73,21 @@ public class MessageService {
         {
             return 0;
         }
+    }
+
+    public int addMessage(Message message)
+    {
+        //I need some way to check if the postedBy is a real userId. So, I think.. I'll need to do the check in the Controller. That makes sense to me.
+        if(message.getMessageText() != "" && message.getMessageText().length() <= 255)
+        {
+            //everything is valid, so we can save the message. However, we're just going to return the http code, because I know how to do things that way.
+            return 200;
+        }
+        return 400;
+    }
+
+    public List<Message> getAllMessagesByPostedBy(int postedBy)
+    {
+        return messageRepository.getMessagesByPostedBy(postedBy);
     }
 }

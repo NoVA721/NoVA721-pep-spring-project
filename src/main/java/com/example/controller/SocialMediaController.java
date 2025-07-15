@@ -33,47 +33,25 @@ public class SocialMediaController {
 
     //need to define every method here? @POST, @GET, etc.
 
-    /*@PostMapping("/register") //this is how I make endpoints. so it'd be @PostMapping, @GetMapping, etc
+    @PostMapping("/register")
     public ResponseEntity<Account> register(@RequestBody Account body)
     {
-        //ResponseEntity<Account> resEnt = template.getForEntity
-        //Fuck it, i'm going to try to test with user and password.
-        //if(user != "" && pass.length() >= 4)
-        if(body.getUsername() != "" && body.getPassword().length() >= 4)
+        int response = 0;
+        if(accountService.getAccountByUsername(body) == 400)
         {
-            if(accountService.getAccountByUsername(body.getUsername()) != null) //so if there is an account by this username, we need to fail it with code 409.
-            {
-                //so what the hell do we shit out of this. I still don't knw how THIS works. I'm going insane.
-                //ResponseEntity<Account> test = new ResponseEntity<>(body, HttpStatus.CONFLICT);
-                //body.status(409); //nah this doesn't work.
-                //ResponseEntity.status(HttpStatus.CONFLICT); //will this work? At all? Something is giving me problems.
-                //return null; //I think this will... maybe... work. Probably not this isn't being put anywhere WHAT DO I DO.
-                ResponseEntity<Account> test = new ResponseEntity<>(body, HttpStatus.CONFLICT); //the body won't work, need a function in accountService to get full account
-                return test;
-            }
-            else
-            {
-                //below is just me testing out creating a new response entity.
-                ResponseEntity<Account> test = new ResponseEntity<>(body, HttpStatus.CREATED); //so this technically works. I don't know if it has the proper ID though. Maybe??
-                //return accountService.persistAccount(test);
-                return test; //oh wait i probably need to save it too 
-                //return null;
-            }
+            response = 400;
         }
-        else
+        else if (accountService.getAccountByUsername(body) == 409)
         {
-            //ResponseEntity.status(HttpStatus.BAD_REQUEST);
-            //return null;
-            ResponseEntity<Account> test = new ResponseEntity<>(body, HttpStatus.BAD_REQUEST);
-            return test;
+            response = 409;
         }
-    }*/
-
-    /*@PostMapping("/register")
-    public ResponseEntity<Account> register(@RequestBody Account body)
-    {
-        return null;
-    }*/
+        else if (accountService.getAccountByUsername(body) == 200)
+        {
+            response = 200;
+            accountService.persistAccount(body);
+        }
+        return ResponseEntity.status(response).body(body);
+    }
 
     @GetMapping("messages/{messageId}")
     public ResponseEntity<Message> findMessageByMessageId(@PathVariable Integer messageId)
@@ -93,7 +71,7 @@ public class SocialMediaController {
     public ResponseEntity<String> deleteMessageByMessageId(@PathVariable Integer messageId)
     {
         //return null;
-        //this needs to return a response entity with the body having however many were deleted if any were, and empty if none were. how in the god damn. I guess just have the messageService.whatever return the number of rows affected, and if 0 then have it be empty.
+        //this needs to return a response entity with the body having however many were deleted if any were, and empty if none were.
         if(messageService.deleteMessageByMessageId(messageId) == 1)
         {
             return ResponseEntity.status(200).body("1");
@@ -104,12 +82,26 @@ public class SocialMediaController {
         }
     }
 
-    //create a new message. This requires me to be able to find users. Last one I can do without touching Accounts is updating via the messageId.
-   /*@PostMapping("messages")
-    public ResponseEntity<Message>
+    
+   @PostMapping("messages")
+    public ResponseEntity<Message> createMessage(@RequestBody Message message)
     {
-
-    }*/
+        int response = 400; //starting this at 400 in place of having an else on the outside if to set it to 400.
+        if(accountService.getAccountById(message.getPostedBy()))
+        {
+            //if we are here, then the ID is correct.
+            if(messageService.addMessage(message) == 200)
+            {
+                response = 200;
+                messageService.persistMessage(message);
+            }
+            else
+            {
+                response = 400;
+            }
+        }
+        return ResponseEntity.status(response).body(message);
+    }
 
     //update message via messageid
     @PatchMapping("messages/{messageId}")
@@ -125,6 +117,28 @@ public class SocialMediaController {
         }
     }
 
-    //Honestly, I don't think I can properly move forward due to the weird issue I'm having with the AccountRepository. 
-    //I think i may interfere with things needing to touch upon the userIds/AccountService/AccountRepository, which the remaining ones do.
+    @PostMapping("login")
+    public ResponseEntity<Account> loginAttempt(@RequestBody Account account)
+    {
+        int response = 0;
+        if(accountService.loginAttempt(account) == null)
+        {
+            response = 401;
+            return ResponseEntity.status(response).body(null);
+        }
+        else
+        {
+            response = 200;
+            return ResponseEntity.status(response).body(accountService.loginAttempt(account));
+        }
+    }
+
+    @GetMapping("accounts/{accountId}/messages")
+    public ResponseEntity<List<Message>> getAllMessagesByAccountId(@PathVariable Integer accountId)
+    {
+        //thinking I might need to do an if(getaccountbyid, real account) but I can also just... try yeeting in the call to getMessagePostedBy. Yeah that works lol.
+        return ResponseEntity.status(200).body(messageService.getAllMessagesByPostedBy(accountId));
+        //return ResponseEntity.status(200).body(null);
+    }
+
 }
